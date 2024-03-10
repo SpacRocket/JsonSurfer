@@ -105,10 +105,4 @@ public class JsonPathTest {
         }
     }
 
-    @Test
-    public void negativeIndex() throws Exception {
-        int[] array = new int[]{12, 34};
-        assertEquals(34, compile("$[-1:]").resolve(array, new PoJoResolver()));
-    }
-
 }

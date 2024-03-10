@@ -1,27 +1,3 @@
-/*
- * MIT License
- *
- * Copyright (c) 2019 WANG Lingsong
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package org.jsfr.json;
 
 import com.google.common.io.Resources;
@@ -644,16 +620,34 @@ public abstract class JsonSurferTest {
         JsonPathListener mock2 = mock(JsonPathListener.class);
         JsonPathListener mock3 = mock(JsonPathListener.class);
         JsonPathListener mock4 = mock(JsonPathListener.class);
+        JsonPathListener mock5 = mock(JsonPathListener.class);
         surfer.configBuilder()
                 .bind("$[:2]", mock1)
                 .bind("$[0:2]", mock2)
                 .bind("$[2:]", mock3)
                 .bind("$[:]", mock4)
+                .bind("$[-1:]", mock5)
                 .buildAndSurf(read("array.json"));
         verify(mock1, times(2)).onValue(any(), any(ParsingContext.class));
         verify(mock2, times(2)).onValue(any(), any(ParsingContext.class));
         verify(mock3, times(3)).onValue(any(), any(ParsingContext.class));
         verify(mock4, times(5)).onValue(any(), any(ParsingContext.class));
+        verify(mock5, times(1)).onValue(any(), any(ParsingContext.class));
+    }
+
+    //TODO: After finishing put it into testParsingArray.
+    @Test
+    public void negativeIndex() throws Exception {
+        JsonPathListener objectElement = mock(JsonPathListener.class);
+
+        surfer.configBuilder()
+              .bind("$[-1:]", objectElement)
+              .buildAndSurf(read("array.json"));
+
+        Object object = provider.createObject();
+        provider.put(object, "key", provider.primitive("value"));
+        verify(objectElement).onValue(eq(provider.primitiveNull()), any(ParsingContext.class));
+        verify(objectElement, times(1)).onValue(any(), any(ParsingContext.class));
     }
 
     @Test
